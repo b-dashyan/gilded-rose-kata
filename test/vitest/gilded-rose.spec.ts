@@ -44,12 +44,15 @@ describe('Gilded Rose', () => {
   });
 
   describe('normal items', () => {
-    it('lower both sellIn and quality at the end of each day', () => {
-      expect(updateOnce('Elixir', 5, 7)).toMatchObject({
-        sellIn: 4,
-        quality: 6,
-      });
-    });
+    it.each([5, 1])(
+      'lower both sellIn and quality at the end of each day (sellIn %i)',
+      (sellIn) => {
+        expect(updateOnce('Elixir', sellIn, 7)).toMatchObject({
+          sellIn: sellIn - 1,
+          quality: 6,
+        });
+      },
+    );
 
     it.each([
       { sellIn: 0, expectedSellIn: -1 },
@@ -77,12 +80,15 @@ describe('Gilded Rose', () => {
   });
 
   describe('Aged Brie', () => {
-    it('increases in quality the older it gets', () => {
-      expect(updateOnce(AGED_BRIE, 2, 0)).toMatchObject({
-        sellIn: 1,
-        quality: 1,
-      });
-    });
+    it.each([2, 1])(
+      'increases in quality the older it gets (sellIn %i)',
+      (sellIn) => {
+        expect(updateOnce(AGED_BRIE, sellIn, 0)).toMatchObject({
+          sellIn: sellIn - 1,
+          quality: 1,
+        });
+      },
+    );
 
     // The requirements only say brie gains quality with age. The +2 after the
     // sell by date is legacy behaviour, pinned because the shop runs it today.
