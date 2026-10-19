@@ -1,20 +1,20 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es5",
+    "target": "es2024",
+    "lib": ["es2024"],
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "types": ["node"],
     "strict": true,
-    "noImplicitAny": false,
-    "sourceMap": true,
-    "baseUrl": "./",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
     "paths": {
-      "@/*": [
-        "app/*"
-      ]
+      "@/*": ["./app/*"]
     }
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["app", "test", "vitest.config.ts"]
 }

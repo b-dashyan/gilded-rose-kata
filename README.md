@@ -4,54 +4,58 @@ This is the Gilded Rose kata in TypeScript.
 
 ## Getting started
 
-Install dependencies
+Requires Node 24 (see `.nvmrc`).
 
 ```sh
+nvm use
 npm install
 ```
 
-## Run the unit tests from the Command-Line
+## Scripts
 
-There are two unit test frameworks to choose from, Jest and Mocha.
+| Command                 | What it does                             |
+| ----------------------- | ---------------------------------------- |
+| `npm test`              | Run the Vitest suite once                |
+| `npm run test:watch`    | Run Vitest in watch mode                 |
+| `npm run test:coverage` | Run the suite with V8 coverage           |
+| `npm run golden-master` | Print the TextTest fixture day by day    |
+| `npm run typecheck`     | Type-check with `tsc` (no emit)          |
+| `npm run lint`          | Lint and format check with Biome         |
+| `npm run lint:fix`      | Apply Biome's safe fixes and formatting  |
+| `npm run ci`            | Everything CI runs: Biome, tsc, coverage |
 
-```sh
-npm run test:jest
-```
+## Golden master
 
-To run all tests in watch mode
-
-```sh
-npm run test:jest:watch
-```
-
-Mocha
-
-```sh
-npm run test:mocha
-```
-
-
-## Run the TextTest fixture from the Command-Line
-
-_You may need to install `ts-node`_
+`npm run golden-master` prints the kata's TextTest fixture for 2 days, or pass
+the number of days to simulate:
 
 ```sh
-npx ts-node test/golden-master-text-test.ts
+npm run golden-master -- 30
 ```
 
-Or with number of days as args:
-```sh
-npx ts-node test/golden-master-text-test.ts 10
-```
+It runs with plain `node` via Node 24's built-in type stripping, which is why
+it imports `../app/gilded-rose.ts` with the extension. It is a tool for
+exploring behaviour by hand. The regression test is
+`test/vitest/golden-master.spec.ts`, which snapshots the same fixture plus
+boundary items over 30 days.
 
-You should make sure the command shown above works when you execute it in a terminal before trying to use TextTest (see below).
+## Git hooks
 
+`npm install` sets up two [Husky](https://typicode.github.io/husky/) hooks:
 
-## Run the TextTest approval test that comes with this project
+| Hook       | Runs                                     |
+| ---------- | ---------------------------------------- |
+| pre-commit | Biome on the staged files                |
+| pre-push   | `npm run typecheck` and `npm test`       |
 
-There are instructions in the [TextTest Readme](../texttests/README.md) for setting up TextTest. You will need to specify the Python executable and interpreter in [config.gr](../texttests/config.gr). Uncomment these lines:
+## Continuous integration
 
-    executable:${TEXTTEST_HOME}/python/texttest_fixture.py
-    interpreter:python
+GitHub Actions (`.github/workflows/ci.yml`) runs Biome, the type-check and the
+test suite with coverage on every pull request and on pushes to `master`.
 
+## Approach
 
+I treated this like legacy code I'd inherited: first get the tooling and CI
+into shape, then pin the current behaviour down with a golden master, and only
+then refactor. The reasoning behind each choice (including the one change to
+the `Item` class) is in [DECISIONS.md](DECISIONS.md).
