@@ -7,5 +7,3 @@ app/**/*.js.map
 test/**/*.js
 test/**/*.js.map
 coverage
-.nyc_output
-package-lock.json

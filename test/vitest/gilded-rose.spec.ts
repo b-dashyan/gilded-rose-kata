@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { Item, GildedRose } from '@/gilded-rose';
 
 describe('Gilded Rose', () => {
