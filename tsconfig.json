@@ -16,5 +16,5 @@
       "@/*": ["./app/*"]
     }
   },
-  "include": ["app", "test", "vitest.config.ts"]
+  "include": ["app", "test", "vitest.config.ts", "vitest.unit.config.ts"]
 }
