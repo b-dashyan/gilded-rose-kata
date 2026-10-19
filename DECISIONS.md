@@ -45,7 +45,8 @@ they stay there. 15 would cut off the fixture's backstage pass just before it
 drops to zero.
 
 The snapshot also records today's (wrong) Conjured behaviour. When I implement
-Conjured items, the snapshot diff should only touch Conjured lines.
+Conjured items, the snapshot diff should only touch Conjured lines. (It
+did, see decision 12.)
 
 ## 4. Tests before `lint:fix`
 
@@ -239,3 +240,28 @@ kept everything in `app/gilded-rose.ts`:
 
 I'll split when there's a real reason, like the file growing a lot or the
 kinds needing more than one function each.
+
+## 12. Conjured items, test first
+
+Conjured is the only new behaviour in the kata, so I wrote the tests before the
+code. The failing tests went in as their own commit, then the feature.
+
+- **Tests from the requirements.** "Degrade in Quality twice as fast as normal
+  items", so the Conjured tests mirror the normal-item ones: the same `it.each`
+  boundaries, starting quality 7, and the losses doubled. That
+  includes `sellIn` 1, the gap Stryker found in refactor step 5.
+- **Prefix match.** The requirements don't name one Conjured item, and the
+  fixture's is `Conjured Mana Cake`, so any name starting with `Conjured`
+  counts. That makes Conjured the only kind matched by prefix. The others
+  still match exactly (decision 10). The check sits in the `switch`'s
+  `default`, since a Conjured item is a normal item that degrades faster.
+- **Two `decreaseQuality` calls instead of an amount.** It matches how
+  backstage passes stack `increaseQuality`, and it keeps the helpers moving
+  one step at a time. With an amount I'd need a clamp, and the obvious
+  `Math.max(0, quality - amount)` would turn an invalid -3 into 0, breaking a
+  pinned test (refactor step 4). I'd add an amount if a kind ever needs a
+  bigger or odd rate.
+- **Golden master.** I regenerated the snapshot in the same commit as the
+  feature. 12 lines changed, all of them Conjured, as decision 3 predicted.
+- **Mutation testing.** 84 mutants (up from 66), all killed by both the full
+  and the unit-only run.
