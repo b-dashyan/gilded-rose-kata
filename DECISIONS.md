@@ -193,3 +193,20 @@ master, the unit tests and Stryker all green before and after.
 - **Worth knowing:** the guards only matter for quality already outside 0 to
   50, which I'd left untested in decision 10. Stryker flagged it, so I pinned
   the legacy behaviour (55 stays 55, -3 stays -3) with two tests.
+
+**Step 5: one function per item kind.**
+
+- **What:** `updateQuality` is now a `switch` on the item name that calls
+  `updateAgedBrie`, `updateBackstagePasses` or `updateNormalItem`. Sulfuras has
+  its own empty `case`, so the legendary rule stays visible.
+- **Why:** each function reads like its rule in the requirements, and Conjured
+  becomes one more `case` instead of another layer of nested `if`s. Each
+  function keeps the legacy order: quality first, then `sellIn`, then the
+  check for "past the sell by date" on the new `sellIn`.
+- **Worth knowing:** the full Stryker run stayed at 100%, but the unit-only one
+  found 2 survivors: `sellIn < 0` to `<= 0` for brie and normal items. Before,
+  one shared check covered every kind, and the backstage test at `sellIn` 1
+  killed it. Now each kind has its own check, and no unit test updated brie or
+  a normal item on the last day before the sell by date. I added `sellIn` 1 to
+  both, in a commit before this one. The golden master caught it all along,
+  which is exactly why the unit-only run exists. Now 66 mutants, all killed.
