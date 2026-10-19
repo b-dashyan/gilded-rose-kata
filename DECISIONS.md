@@ -210,3 +210,32 @@ master, the unit tests and Stryker all green before and after.
   a normal item on the last day before the sell by date. I added `sellIn` 1 to
   both, in a commit before this one. The golden master caught it all along,
   which is exactly why the unit-only run exists. Now 66 mutants, all killed.
+
+**Where I stopped: one file, one `switch`.**
+
+I thought about a lookup table, a map from item name to update function,
+but the `switch` reads better at this size:
+
+- Sulfuras gets an empty `case` with a comment. In a map it would be a no-op
+  function, and the rule is easier to miss there.
+- Normal items are the `default`. With a map that becomes a
+  `?? updateNormalItem` fallback at the call site.
+- Conjured will probably match on a prefix (decision 10). A map keyed by exact
+  name doesn't help with that any more than the `switch` does.
+
+A map is worth it when there are many kinds, or when kinds get added from
+outside. Neither is true here.
+
+I also thought about moving the update functions into their own `updaters.ts`, but
+kept everything in `app/gilded-rose.ts`:
+
+- It's about 95 lines and reads top to bottom: item names, the `switch`, then
+  one small function per kind. Splitting it would add a file to jump to
+  without making anything clearer.
+- The updaters need `Item` and `GildedRose` needs the updaters, so the two
+  files would import each other. `import type` makes that harmless, but it's
+  one more thing to explain, and `Item` itself can't move.
+- Conjured adds one function and one `case`, so it still fits.
+
+I'll split when there's a real reason, like the file growing a lot or the
+kinds needing more than one function each.
