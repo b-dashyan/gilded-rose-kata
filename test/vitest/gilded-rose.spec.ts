@@ -4,6 +4,7 @@ import { GildedRose, Item } from '@/gilded-rose';
 const AGED_BRIE = 'Aged Brie';
 const SULFURAS = 'Sulfuras, Hand of Ragnaros';
 const BACKSTAGE_PASSES = 'Backstage passes to a TAFKAL80ETC concert';
+const CONJURED = 'Conjured Mana Cake';
 
 function updateOnce(name: string, sellIn: number, quality: number): Item {
   const [item] = new GildedRose([
@@ -187,6 +188,47 @@ describe('Gilded Rose', () => {
         sellIn: 4,
         quality: 19,
       });
+    });
+  });
+
+  describe('Conjured items', () => {
+    it.each([5, 1])(
+      'degrade in quality twice as fast as normal items (sellIn %i)',
+      (sellIn) => {
+        expect(updateOnce(CONJURED, sellIn, 7)).toMatchObject({
+          sellIn: sellIn - 1,
+          quality: 5,
+        });
+      },
+    );
+
+    it.each([0, -3])(
+      'degrade twice as fast as normal items once the sell by date has passed (sellIn %i)',
+      (sellIn) => {
+        expect(updateOnce(CONJURED, sellIn, 7)).toMatchObject({
+          sellIn: sellIn - 1,
+          quality: 3,
+        });
+      },
+    );
+
+    it.each([
+      { sellIn: 5, quality: 1 },
+      { sellIn: 0, quality: 3 },
+      { sellIn: 0, quality: 0 },
+    ])(
+      'quality is never negative (sellIn $sellIn, quality $quality)',
+      ({ sellIn, quality }) => {
+        expect(updateOnce(CONJURED, sellIn, quality).quality).toBe(0);
+      },
+    );
+
+    // The requirements don't name one item, and the fixture's is "Conjured
+    // Mana Cake", so any "Conjured" prefix counts.
+    it('apply to any item whose name starts with "Conjured"', () => {
+      expect(updateOnce('Conjured Elixir of the Mongoose', 5, 7)).toMatchObject(
+        { sellIn: 4, quality: 5 },
+      );
     });
   });
 });

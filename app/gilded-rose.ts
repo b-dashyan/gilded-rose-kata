@@ -13,6 +13,7 @@ export class Item {
 const AGED_BRIE = 'Aged Brie';
 const BACKSTAGE_PASSES = 'Backstage passes to a TAFKAL80ETC concert';
 const SULFURAS = 'Sulfuras, Hand of Ragnaros';
+const CONJURED_PREFIX = 'Conjured';
 
 const MIN_QUALITY = 0;
 const MAX_QUALITY = 50;
@@ -37,7 +38,11 @@ export class GildedRose {
           // Legendary: never sold, never changes
           break;
         default:
-          updateNormalItem(item);
+          if (item.name.startsWith(CONJURED_PREFIX)) {
+            updateConjured(item);
+          } else {
+            updateNormalItem(item);
+          }
       }
     }
 
@@ -71,6 +76,16 @@ function updateNormalItem(item: Item) {
   decreaseQuality(item);
   item.sellIn = item.sellIn - 1;
   if (item.sellIn < 0) {
+    decreaseQuality(item);
+  }
+}
+
+function updateConjured(item: Item) {
+  decreaseQuality(item);
+  decreaseQuality(item);
+  item.sellIn = item.sellIn - 1;
+  if (item.sellIn < 0) {
+    decreaseQuality(item);
     decreaseQuality(item);
   }
 }
