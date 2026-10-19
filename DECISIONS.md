@@ -133,7 +133,8 @@ the shop runs today:
   `Conjured Mana Cake`), and if I want the same for the others, that test is
   where I'll have to decide it on purpose.
 - **Quality above 50 is never clamped.** A brie at 55 stays 55. That input
-  breaks the rules to begin with, so I didn't test it.
+  breaks the rules to begin with, so I didn't test it. (I had to later, see
+  step 4 of decision 11.)
 
 **Mutation testing the unit tests alone.** The golden master kills nearly
 everything, so it could hide gaps in the unit tests.
@@ -182,3 +183,13 @@ master, the unit tests and Stryker all green before and after.
 - **Worth knowing:** the two only differ for `NaN` or `Infinity`, which aren't
   valid qualities, so it's safe. Stryker now makes 94 mutants instead of 95,
   because the old subtraction had its own mutant (`-` to `+`).
+
+**Step 4: quality helpers.**
+
+- **What:** added `increaseQuality` and `decreaseQuality`, with `MIN_QUALITY`
+  and `MAX_QUALITY`, so the bounds live in one place instead of six nested
+  `< 50` and `> 0` checks.
+- **Why:** the item logic now says what happens, not how the bounds are kept.
+- **Worth knowing:** the guards only matter for quality already outside 0 to
+  50, which I'd left untested in decision 10. Stryker flagged it, so I pinned
+  the legacy behaviour (55 stays 55, -3 stays -3) with two tests.

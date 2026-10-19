@@ -32,6 +32,17 @@ describe('Gilded Rose', () => {
     expect(new GildedRose().updateQuality()).toEqual([]);
   });
 
+  // Invalid input, but this is what the legacy code does with it (see DECISIONS.md)
+  describe('quality already outside 0 to 50', () => {
+    it('is left alone when it would increase', () => {
+      expect(updateOnce(AGED_BRIE, 5, 55).quality).toBe(55);
+    });
+
+    it('is left alone when it would decrease', () => {
+      expect(updateOnce('Elixir', 5, -3).quality).toBe(-3);
+    });
+  });
+
   describe('normal items', () => {
     it('lower both sellIn and quality at the end of each day', () => {
       expect(updateOnce('Elixir', 5, 7)).toMatchObject({
