@@ -18,11 +18,12 @@ npm install
 | `npm test`              | Run the Vitest suite once                |
 | `npm run test:watch`    | Run Vitest in watch mode                 |
 | `npm run test:coverage` | Run the suite with V8 coverage           |
+| `npm run test:mutation` | Mutation testing with StrykerJS          |
 | `npm run golden-master` | Print the TextTest fixture day by day    |
 | `npm run typecheck`     | Type-check with `tsc` (no emit)          |
 | `npm run lint`          | Lint and format check with Biome         |
 | `npm run lint:fix`      | Apply Biome's safe fixes and formatting  |
-| `npm run ci`            | Everything CI runs: Biome, tsc, coverage |
+| `npm run ci`            | The main CI job: Biome, tsc, coverage    |
 
 ## Golden master
 
@@ -39,6 +40,13 @@ exploring behaviour by hand. The regression test is
 `test/vitest/golden-master.spec.ts`, which snapshots the same fixture plus
 boundary items over 30 days.
 
+## Mutation testing
+
+`npm run test:mutation` runs [StrykerJS](https://stryker-mutator.io/), which
+makes small changes (mutants) to `app/` and checks that a test fails for each
+one. The HTML report lands in `reports/mutation/mutation.html`. The break
+threshold is 100%, so any surviving mutant fails the run.
+
 ## Git hooks
 
 `npm install` sets up two [Husky](https://typicode.github.io/husky/) hooks:
@@ -50,8 +58,10 @@ boundary items over 30 days.
 
 ## Continuous integration
 
-GitHub Actions (`.github/workflows/ci.yml`) runs Biome, the type-check and the
-test suite with coverage on every pull request and on pushes to `master`.
+GitHub Actions (`.github/workflows/ci.yml`) runs two jobs on every pull request
+and on pushes to `master`: one for Biome, the type-check and the test suite
+with coverage, and one for mutation testing, which uploads the Stryker report
+as an artifact.
 
 ## Approach
 
