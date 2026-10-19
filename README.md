@@ -57,10 +57,10 @@ whether the unit tests catch every mutant on their own. Its report is
 
 `npm install` sets up two [Husky](https://typicode.github.io/husky/) hooks:
 
-| Hook       | Runs                                     |
-| ---------- | ---------------------------------------- |
-| pre-commit | Biome on the staged files                |
-| pre-push   | `npm run typecheck` and `npm test`       |
+| Hook       | Runs                               |
+| ---------- | ---------------------------------- |
+| pre-commit | Biome on the staged files          |
+| pre-push   | `npm run typecheck` and `npm test` |
 
 ## Continuous integration
 
@@ -72,6 +72,21 @@ as an artifact.
 ## Approach
 
 I treated this like legacy code I'd inherited: first get the tooling and CI
-into shape, then pin the current behaviour down with a golden master, and only
-then refactor. The reasoning behind each choice (including the one change to
-the `Item` class) is in [DECISIONS.md](DECISIONS.md).
+into shape, then pin the current behaviour down, then refactor in small steps,
+and only then add the new feature. The requirements are the kata's
+[GildedRoseRequirements.md](https://github.com/emilybache/GildedRose-Refactoring-Kata/blob/main/GildedRoseRequirements.md).
+
+Where it ended up:
+
+- `updateQuality` is a `switch` with one small function per kind of item.
+- Conjured items degrade twice as fast as normal items, added test first.
+- A golden master and one unit test per rule, both at a 100% mutation score.
+- Strict TypeScript, including `noUncheckedIndexedAccess`.
+
+## How to read this
+
+Each step was its own pull request, so the
+[closed PRs](https://github.com/b-dashyan/gilded-rose-kata/pulls?q=is%3Apr+is%3Aclosed)
+tell the story in order: tooling and CI, mutation testing, rule-level unit
+tests, the refactor, Conjured items, and these finishing touches. Inside each
+PR, the commits are small enough to follow one at a time. The reasoning behind each choice is in [DECISIONS.md](DECISIONS.md).
