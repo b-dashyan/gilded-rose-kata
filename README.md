@@ -39,14 +39,23 @@ exploring behaviour by hand. The regression test is
 `test/vitest/golden-master.spec.ts`, which snapshots the same fixture plus
 boundary items over 30 days.
 
+## Git hooks
+
+`npm install` sets up two [Husky](https://typicode.github.io/husky/) hooks:
+
+| Hook       | Runs                                     |
+| ---------- | ---------------------------------------- |
+| pre-commit | Biome on the staged files                |
+| pre-push   | `npm run typecheck` and `npm test`       |
+
 ## Continuous integration
 
 GitHub Actions (`.github/workflows/ci.yml`) runs Biome, the type-check and the
 test suite with coverage on every pull request and on pushes to `master`.
 
-## Notes
+## Approach
 
-- The kata asks not to alter the `Item` class. The only change I made is adding
-  type annotations to its constructor parameters, so it compiles under full
-  `strict` mode. Types are erased at compile time, so `Item`'s runtime shape
-  and behaviour are unchanged.
+I treated this like legacy code I'd inherited: first get the tooling and CI
+into shape, then pin the current behaviour down with a golden master, and only
+then refactor. The reasoning behind each choice (including the one change to
+the `Item` class) is in [DECISIONS.md](DECISIONS.md).
