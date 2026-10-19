@@ -160,3 +160,15 @@ master, the unit tests and Stryker all green before and after.
   coverage was lost. The tests keep their own copies of the names on purpose:
   if they imported the constants, a typo in one would change the app and the
   tests together and nothing would fail.
+
+**Step 2: loop with `for...of`.**
+
+- **What:** replaced the index loop with `for (const item of this.items)`, so
+  every `this.items[i]` became `item`.
+- **Why:** the index was only used to reach the item, and the conditionals are
+  much easier to read without it. Still mechanical, and everything is green.
+- **Worth knowing:** Stryker now makes 95 mutants instead of 99. The four that
+  went away were mutants of the loop counter (`i < length`, `i++`). It also
+  unblocks `noUncheckedIndexedAccess` (decision 2) for `app/`. Only two spots
+  in the tests still fail it: `process.argv[2]` in the TextTest fixture and the
+  `const [item]` destructuring in the unit tests.
