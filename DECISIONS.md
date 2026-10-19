@@ -172,3 +172,13 @@ master, the unit tests and Stryker all green before and after.
   unblocks `noUncheckedIndexedAccess` (decision 2) for `app/`. Only two spots
   in the tests still fail it: `process.argv[2]` in the TextTest fixture and the
   `const [item]` destructuring in the unit tests.
+
+**Step 3: say "drops to 0" directly.**
+
+- **What:** replaced `item.quality = item.quality - item.quality` with
+  `item.quality = 0` for backstage passes after the concert.
+- **Why:** it's the requirement's own wording, "Quality drops to 0 after the
+  concert", and the old line made you stop and work it out.
+- **Worth knowing:** the two only differ for `NaN` or `Infinity`, which aren't
+  valid qualities, so it's safe. Stryker now makes 94 mutants instead of 95,
+  because the old subtraction had its own mutant (`-` to `+`).
