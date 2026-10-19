@@ -141,3 +141,22 @@ everything, so it could hide gaps in the unit tests.
 but they kill all 104 mutants too, so it has the same 100% threshold. It's a
 local tool, not a CI job. The main run already guards the code, and this one is
 for checking the unit tests before the refactor.
+
+## 11. Refactoring `updateQuality`
+
+I'm refactoring in small steps, each one its own commit, with the golden
+master, the unit tests and Stryker all green before and after.
+
+**Step 1: name the special items.**
+
+- **What:** replaced the three item names, repeated as string literals 8
+  times, with `AGED_BRIE`, `BACKSTAGE_PASSES` and `SULFURAS`.
+- **Why:** the conditionals get shorter and easier to read for the next steps,
+  and there's one definition per name instead of copies that could drift
+  apart. It's a mechanical change: the golden master, the unit tests and
+  Stryker are all still green.
+- **Worth knowing:** Stryker now makes 99 mutants instead of 104, because it
+  creates one per string literal. Eight literals became three constants, so no
+  coverage was lost. The tests keep their own copies of the names on purpose:
+  if they imported the constants, a typo in one would change the app and the
+  tests together and nothing would fail.
