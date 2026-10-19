@@ -13,17 +13,18 @@ npm install
 
 ## Scripts
 
-| Command                 | What it does                             |
-| ----------------------- | ---------------------------------------- |
-| `npm test`              | Run the Vitest suite once                |
-| `npm run test:watch`    | Run Vitest in watch mode                 |
-| `npm run test:coverage` | Run the suite with V8 coverage           |
-| `npm run test:mutation` | Mutation testing with StrykerJS          |
-| `npm run golden-master` | Print the TextTest fixture day by day    |
-| `npm run typecheck`     | Type-check with `tsc` (no emit)          |
-| `npm run lint`          | Lint and format check with Biome         |
-| `npm run lint:fix`      | Apply Biome's safe fixes and formatting  |
-| `npm run ci`            | The main CI job: Biome, tsc, coverage    |
+| Command                      | What it does                              |
+| ---------------------------- | ----------------------------------------- |
+| `npm test`                   | Run the Vitest suite once                 |
+| `npm run test:watch`         | Run Vitest in watch mode                  |
+| `npm run test:coverage`      | Run the suite with V8 coverage            |
+| `npm run test:mutation`      | Mutation testing with StrykerJS           |
+| `npm run test:mutation:unit` | Mutation testing with the unit tests only |
+| `npm run golden-master`      | Print the TextTest fixture day by day     |
+| `npm run typecheck`          | Type-check with `tsc` (no emit)           |
+| `npm run lint`               | Lint and format check with Biome          |
+| `npm run lint:fix`           | Apply Biome's safe fixes and formatting   |
+| `npm run ci`                 | The main CI job: Biome, tsc, coverage     |
 
 ## Golden master
 
@@ -46,6 +47,11 @@ boundary items over 30 days.
 makes small changes (mutants) to `app/` and checks that a test fails for each
 one. The HTML report lands in `reports/mutation/mutation.html`. The break
 threshold is 100%, so any surviving mutant fails the run.
+
+`npm run test:mutation:unit` does the same with only the rule-level unit tests
+(`test/vitest/gilded-rose.spec.ts`), leaving out the golden master. It shows
+whether the unit tests catch every mutant on their own. Its report is
+`reports/mutation/unit.html`.
 
 ## Git hooks
 

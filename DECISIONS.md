@@ -108,3 +108,36 @@ versions I picked in decision 1:
 
 Both are easy to bump again once the tooling catches up. My takeaway: being on
 the newest version only helps if the rest of the toolchain works with it.
+
+## 10. Rule-level unit tests
+
+The golden master tells me if behaviour changed, but not which rule broke. So
+`gilded-rose.spec.ts` has one test per rule, written from
+`GildedRoseRequirements.md` and named in its words. They only go through
+`updateQuality()`, so they should survive the refactor untouched. Boundaries
+are `it.each` tables, so every value shows up in the output and one failing
+case doesn't hide the next. Conjured is left out on purpose: it's a new
+feature, so it gets its own PR, test first.
+
+Where the requirements and the code disagree, the code wins, because it's what
+the shop runs today:
+
+- **Aged Brie gains 2 a day after its sell by date.** The requirements only say
+  it gains quality with age. I pinned the +2 and left a comment on the test.
+- **Names match exactly.** The requirements say "Backstage passes" and
+  "Sulfuras", but only `Backstage passes to a TAFKAL80ETC concert` and
+  `Sulfuras, Hand of Ragnaros` get the special rules. Any other pass is a
+  normal item. Nothing pinned this, so a tidy refactor to `startsWith` could
+  have changed prices without anyone noticing. Now there's a near-miss test for
+  each. Conjured will probably need prefix matching (the fixture item is
+  `Conjured Mana Cake`), and if I want the same for the others, that test is
+  where I'll have to decide it on purpose.
+- **Quality above 50 is never clamped.** A brie at 55 stays 55. That input
+  breaks the rules to begin with, so I didn't test it.
+
+**Mutation testing the unit tests alone.** The golden master kills nearly
+everything, so it could hide gaps in the unit tests.
+`npm run test:mutation:unit` runs Stryker on the unit tests only. I expected survivors,
+but they kill all 104 mutants too, so it has the same 100% threshold. It's a
+local tool, not a CI job. The main run already guards the code, and this one is
+for checking the unit tests before the refactor.
