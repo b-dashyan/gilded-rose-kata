@@ -133,7 +133,8 @@ the shop runs today:
   `Conjured Mana Cake`), and if I want the same for the others, that test is
   where I'll have to decide it on purpose.
 - **Quality above 50 is never clamped.** A brie at 55 stays 55. That input
-  breaks the rules to begin with, so I didn't test it.
+  breaks the rules to begin with, so I didn't test it. (I had to later, see
+  step 4 of decision 11.)
 
 **Mutation testing the unit tests alone.** The golden master kills nearly
 everything, so it could hide gaps in the unit tests.
@@ -141,3 +142,100 @@ everything, so it could hide gaps in the unit tests.
 but they kill all 104 mutants too, so it has the same 100% threshold. It's a
 local tool, not a CI job. The main run already guards the code, and this one is
 for checking the unit tests before the refactor.
+
+## 11. Refactoring `updateQuality`
+
+I'm refactoring in small steps, each one its own commit, with the golden
+master, the unit tests and Stryker all green before and after.
+
+**Step 1: name the special items.**
+
+- **What:** replaced the three item names, repeated as string literals 8
+  times, with `AGED_BRIE`, `BACKSTAGE_PASSES` and `SULFURAS`.
+- **Why:** the conditionals get shorter and easier to read for the next steps,
+  and there's one definition per name instead of copies that could drift
+  apart. It's a mechanical change: the golden master, the unit tests and
+  Stryker are all still green.
+- **Worth knowing:** Stryker now makes 99 mutants instead of 104, because it
+  creates one per string literal. Eight literals became three constants, so no
+  coverage was lost. The tests keep their own copies of the names on purpose:
+  if they imported the constants, a typo in one would change the app and the
+  tests together and nothing would fail.
+
+**Step 2: loop with `for...of`.**
+
+- **What:** replaced the index loop with `for (const item of this.items)`, so
+  every `this.items[i]` became `item`.
+- **Why:** the index was only used to reach the item, and the conditionals are
+  much easier to read without it. Still mechanical, and everything is green.
+- **Worth knowing:** Stryker now makes 95 mutants instead of 99. The four that
+  went away were mutants of the loop counter (`i < length`, `i++`). It also
+  unblocks `noUncheckedIndexedAccess` (decision 2) for `app/`. Only two spots
+  in the tests still fail it: `process.argv[2]` in the TextTest fixture and the
+  `const [item]` destructuring in the unit tests.
+
+**Step 3: say "drops to 0" directly.**
+
+- **What:** replaced `item.quality = item.quality - item.quality` with
+  `item.quality = 0` for backstage passes after the concert.
+- **Why:** it's the requirement's own wording, "Quality drops to 0 after the
+  concert", and the old line made you stop and work it out.
+- **Worth knowing:** the two only differ for `NaN` or `Infinity`, which aren't
+  valid qualities, so it's safe. Stryker now makes 94 mutants instead of 95,
+  because the old subtraction had its own mutant (`-` to `+`).
+
+**Step 4: quality helpers.**
+
+- **What:** added `increaseQuality` and `decreaseQuality`, with `MIN_QUALITY`
+  and `MAX_QUALITY`, so the bounds live in one place instead of six nested
+  `< 50` and `> 0` checks.
+- **Why:** the item logic now says what happens, not how the bounds are kept.
+- **Worth knowing:** the guards only matter for quality already outside 0 to
+  50, which I'd left untested in decision 10. Stryker flagged it, so I pinned
+  the legacy behaviour (55 stays 55, -3 stays -3) with two tests.
+
+**Step 5: one function per item kind.**
+
+- **What:** `updateQuality` is now a `switch` on the item name that calls
+  `updateAgedBrie`, `updateBackstagePasses` or `updateNormalItem`. Sulfuras has
+  its own empty `case`, so the legendary rule stays visible.
+- **Why:** each function reads like its rule in the requirements, and Conjured
+  becomes one more `case` instead of another layer of nested `if`s. Each
+  function keeps the legacy order: quality first, then `sellIn`, then the
+  check for "past the sell by date" on the new `sellIn`.
+- **Worth knowing:** the full Stryker run stayed at 100%, but the unit-only one
+  found 2 survivors: `sellIn < 0` to `<= 0` for brie and normal items. Before,
+  one shared check covered every kind, and the backstage test at `sellIn` 1
+  killed it. Now each kind has its own check, and no unit test updated brie or
+  a normal item on the last day before the sell by date. I added `sellIn` 1 to
+  both, in a commit before this one. The golden master caught it all along,
+  which is exactly why the unit-only run exists. Now 66 mutants, all killed.
+
+**Where I stopped: one file, one `switch`.**
+
+I thought about a lookup table, a map from item name to update function,
+but the `switch` reads better at this size:
+
+- Sulfuras gets an empty `case` with a comment. In a map it would be a no-op
+  function, and the rule is easier to miss there.
+- Normal items are the `default`. With a map that becomes a
+  `?? updateNormalItem` fallback at the call site.
+- Conjured will probably match on a prefix (decision 10). A map keyed by exact
+  name doesn't help with that any more than the `switch` does.
+
+A map is worth it when there are many kinds, or when kinds get added from
+outside. Neither is true here.
+
+I also thought about moving the update functions into their own `updaters.ts`, but
+kept everything in `app/gilded-rose.ts`:
+
+- It's about 95 lines and reads top to bottom: item names, the `switch`, then
+  one small function per kind. Splitting it would add a file to jump to
+  without making anything clearer.
+- The updaters need `Item` and `GildedRose` needs the updaters, so the two
+  files would import each other. `import type` makes that harmless, but it's
+  one more thing to explain, and `Item` itself can't move.
+- Conjured adds one function and one `case`, so it still fits.
+
+I'll split when there's a real reason, like the file growing a lot or the
+kinds needing more than one function each.
