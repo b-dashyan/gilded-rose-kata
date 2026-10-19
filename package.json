@@ -16,12 +16,14 @@
     "typecheck": "tsc",
     "lint": "biome check",
     "lint:fix": "biome check --write",
-    "ci": "biome ci && tsc && vitest run --coverage"
+    "ci": "biome ci && tsc && vitest run --coverage",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@types/node": "^24.19.2",
     "@vitest/coverage-v8": "^5.0.5",
+    "husky": "^9.1.7",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vitest": "^5.0.5"
