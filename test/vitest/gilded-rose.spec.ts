@@ -10,6 +10,9 @@ function updateOnce(name: string, sellIn: number, quality: number): Item {
   const [item] = new GildedRose([
     new Item(name, sellIn, quality),
   ]).updateQuality();
+  if (!item) {
+    throw new Error('updateQuality returned no items');
+  }
   return item;
 }
 

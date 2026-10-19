@@ -27,7 +27,8 @@ behaves exactly the same. That felt better than turning off `noImplicitAny`
 for the whole project.
 
 Later I want `noUncheckedIndexedAccess` too. It doesn't fit the legacy
-`this.items[i]` loops, so it waits for the refactor.
+`this.items[i]` loops, so it waits for the refactor. (Done in decision
+13.)
 
 ## 3. A golden master before touching the logic
 
@@ -265,3 +266,14 @@ code. The failing tests went in as their own commit, then the feature.
   feature. 12 lines changed, all of them Conjured, as decision 3 predicted.
 - **Mutation testing.** 84 mutants (up from 66), all killed by both the full
   and the unit-only run.
+
+## 13. Finishing touches
+
+**`noUncheckedIndexedAccess`.** The refactor removed the index loops in `app/`
+(step 2), so I turned it on as promised in decision 2. Only the two test spots
+from step 2 needed changes:
+
+- The TextTest fixture now reads `Number(process.argv[2] ?? 2)`, which also
+  replaced a `let` with a `const`.
+- `updateOnce` in the unit tests throws if `updateQuality` returns no item, so
+  a broken test helper fails loudly instead of reading `undefined`.
